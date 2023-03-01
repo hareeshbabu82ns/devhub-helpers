@@ -13,6 +13,7 @@
 
 **/temp
 /server/public/files/ocr_pdfs/**
+.traineddata
 
 # misc
 .DS_Store
