@@ -1,8 +1,10 @@
 const path = require( "path" );
 const express = require( "express" );
 const cors = require( 'cors' )
+const fs = require( 'fs' );
 const fileUpload = require( 'express-fileupload' );
 const { pdf2pic, textractFromImg } = require( "./utils/ocr-utils" );
+const { fetchCurrentImagesOfPDF } = require( "./utils/utils" );
 const gm = require( 'gm' ).subClass( { imageMagick: '7+' } );
 
 const PORT = process.env.PORT || 3001;
@@ -75,6 +77,17 @@ const LANGS = [
   // 'san',
 ]
 
+app.get( "/ocr/currentImages/:pdf", async ( req, res ) => {
+  try {
+    const tempDir = `${__dirname}/public/files/temp`
+    const images = await fetchCurrentImagesOfPDF( { pdfFileName: req.params.pdf, tempDir } )
+    return res.status( 200 ).json( { status: 'current images', images } )
+  } catch ( err ) {
+    console.log( err )
+    return res.status( 500 ).send( err )
+  }
+} )
+
 app.post( "/ocr/readFromBlobData", ( req, res ) => {
   // console.log( req.body )
   const { imageUrl, croppedAreaPixels, rotation } = req.body
@@ -90,6 +103,7 @@ app.post( "/ocr/readFromBlobData", ( req, res ) => {
         return res.status( 500 ).send( err );
       }
       const ocrText = await textractFromImg( { image: ocrTmpFile, langs: LANGS } )
+      fs.rmSync( ocrTmpFile )
       return res.status( 200 ).json( { status: 'image cropped', ocrText } );
     } )
 } );

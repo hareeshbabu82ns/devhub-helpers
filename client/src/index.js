@@ -1,13 +1,51 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import './index.css';
-import App from './App';
+import OcrEasyCrop from './easy-crop/OcrEasyCrop';
 import reportWebVitals from './reportWebVitals';
+import {
+  createBrowserRouter,
+  RouterProvider,
+} from "react-router-dom";
+import Root from "./routes/root";
+import ErrorPage from "./error-page";
+
+import { getchCurrentImagesLoader, getchCurrentImageLoader } from "./ocr-utils/pdf-api"
+import OcrPdfImages from './easy-crop/OcrPdfImages';
+// import ImageCrop from './img-crop/ImageCrop';
+import ImageEasyCrop from './easy-crop/ImageEasyCrop';
+
+const router = createBrowserRouter( [
+  {
+    path: "/",
+    element: <Root />,
+    errorElement: <ErrorPage />,
+    children: [
+      {
+        path: "/ocr/easy-crop",
+        element: <OcrEasyCrop />,
+      },
+      {
+        path: "/ocr/easy-crop/:file",
+        element: <OcrPdfImages />,
+        loader: getchCurrentImagesLoader,
+      },
+
+    ]
+  },
+  {
+    path: "/ocr/easy-crop/:file/imgCrop/:imgFile",
+    element: <ImageEasyCrop />,
+    // element: <ImageCrop />,
+    loader: getchCurrentImageLoader,
+  },
+
+] );
 
 const root = ReactDOM.createRoot( document.getElementById( 'root' ) );
 root.render(
   <React.StrictMode>
-    <App />
+    <RouterProvider router={router} />
   </React.StrictMode>
 );
 
